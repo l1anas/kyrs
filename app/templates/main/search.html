@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск проектов{% endblock %}
+
+{% block content %}
+<div class="search-results-container">
+    <h1>Результаты поиска: "{{ query }}"</h1>
+
+    <div class="search-box">
+        <form action="{{ url_for('main.search') }}" method="GET">
+            <input type="text" name="q" placeholder="Поиск по проектам, навыкам или авторам..." value="{{ query }}">
+            <button type="submit">Найти</button>
+        </form>
+    </div>
+
+    {% if projects.items %}
+        <div class="projects-grid">
+            {% for project in projects.items %}
+                <div class="project-card">
+                    <h3>{{ project.title }}</h3>
+                    <p class="project-description">{{ project.description|truncate(150) }}</p>
+
+                    <div class="project-skills">
+                        <strong>Требуемые навыки:</strong>
+                        {% for skill in project.skills_required.split(',') %}
+                            <span class="skill-badge">{{ skill.strip() }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <a href="{{ url_for('projects.details', project_id=project.id) }}" class="btn btn-view">
+                        Подробнее
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            {% if projects.has_prev %}
+                <a href="{{ url_for('main.search', q=query, page=projects.prev_num) }}">Предыдущая</a>
+            {% endif %}
+
+            <span>Страница {{ projects.page }} из {{ projects.pages }}</span>
+
+            {% if projects.has_next %}
+                <a href="{{ url_for('main.search', q=query, page=projects.next_num) }}">Следующая</a>
+            {% endif %}
+        </div>
+    {% else %}
+        <p>По вашему запросу ничего не найдено.</p>
+    {% endif %}
+</div>
+
+
+{% endblock %}

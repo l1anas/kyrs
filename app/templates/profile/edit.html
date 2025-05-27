@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}Редактировать профиль {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="profile-container">
+    <h2>Редактировать профиль</h2>
+
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('profile.edit', user_id=user.id) }}">
+      {{ form.hidden_tag() }}
+
+      <!-- Аватарка (по центру) -->
+      <div class="profile-avatar-section">
+          <div class="profile-left">
+              {% if user.avatar %}
+                  <div class="profile-avatar-wrapper">
+                      <img src="{{ url_for('static', filename=user.avatar) }}" alt="Аватар" class="profile-avatar">
+                  </div>
+              {% else %}
+                <div class="profile-avatar-default small-text">Нет фото</div>
+              {% endif %}
+          </div>
+
+          <div class="avatar-controls">
+              <div class="custom-file-upload-wrapper">
+                    <label for="avatar-upload" class="btn btn-edit">
+                        Загрузить новое фото
+                    </label>
+                    {{ form.avatar(id="avatar-upload", class="custom-file-input") }}
+              </div>
+
+              {% if user.avatar %}
+                  <div class="form-check" style="margin-top: 0.5rem;">
+                      <input type="checkbox" name="delete_avatar" id="delete_avatar">
+                      <label for="delete_avatar">Удалить текущий аватар</label>
+                  </div>
+              {% endif %}
+          </div>
+      </div>
+
+      <div class="form-group floating-label-group">
+        {{ form.username(class="form-control", placeholder=" ") }}
+        <label for="{{ form.username.id }}">Имя пользователя</label>
+        {% for error in form.username.errors %}
+          <div class="error-message">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="form-group floating-label-group">
+        {{ form.email(class="form-control", placeholder=" ") }}
+        <label for="{{ form.email.id }}">Email</label>
+        {% for error in form.email.errors %}
+          <div class="error-message">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="form-group floating-label-group">
+        {{ form.about_me(class="form-control", placeholder=" ", rows="4") }}
+        <label for="{{ form.about_me.id }}">О себе</label>
+        {% for error in form.about_me.errors %}
+          <div class="error-message">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Блок навыков -->
+      <div class="form-group floating-label-group">
+        <input type="text" id="skills-input" class="form-control" placeholder="Введите навыки через запятую и нажмите Enter">
+        <div id="skills-list">
+          {% if user.skills %}
+            {% for skill in user.skills.split(',') %}
+              <span class="skill-tag">
+                {{ skill.strip() }}
+                <span class="remove-skill" onclick="removeSkill(this)">×</span>
+              </span>
+            {% endfor %}
+          {% endif %}
+        </div>
+        <input type="hidden" name="skills" id="skills-hidden" value="{{ user.skills or '' }}">
+      </div>
+
+      <div class="form-actions" style="margin-top: 1.5rem;">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{{ url_for('profile.view', user_id=user.id) }}" class="btn btn-reject">Отмена</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.profile-avatar-default {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+    padding: 10px;
+}
+.profile-avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+.avatar-controls {
+    text-align: center;
+    margin-top: 10px;
+}
+
+
+.remove-skill {
+    margin-left: 8px;
+    color: #888;
+    cursor: pointer;
+    font-weight: bold;
+}
+.remove-skill:hover {
+    color: red;
+}
+.custom-file-input {
+    display: none;
+}
+
+
+.skill-tag {
+    background-color: #e0e0e0;
+    color: #374151;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 20px;
+    padding: 6px 12px;
+    margin: 4px;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+</style>
+
+<script>
+function removeSkill(element) {
+    element.parentElement.remove();
+    updateHiddenSkills();
+}
+
+function updateHiddenSkills() {
+    const skills = [...document.querySelectorAll('#skills-list .skill-tag')]
+        .map(el => el.childNodes[0].nodeValue.trim());
+    console.log('Updated skills:', skills);
+    document.getElementById('skills-hidden').value = skills.join(',');
+}
+
+document.getElementById('skills-input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        const val = this.value.trim();
+        console.log('Input value on Enter:', val);
+
+        if (val) {
+            // Разделяем по запятым и пробелам после запятой
+            const newSkills = val.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            console.log('Parsed new skills:', newSkills);
+
+            const existingSkills = [...document.querySelectorAll('#skills-list .skill-tag')]
+                .map(el => el.childNodes[0].nodeValue.trim().toLowerCase());
+            console.log('Existing skills:', existingSkills);
+
+            newSkills.forEach(skill => {
+                if (!existingSkills.includes(skill.toLowerCase())) {
+                    const span = document.createElement('span');
+                    span.className = 'skill-tag';
+                    span.innerHTML = `${skill} <span class="remove-skill" onclick="removeSkill(this)">×</span>`;
+                    document.getElementById('skills-list').appendChild(span);
+                    existingSkills.push(skill.toLowerCase());
+                }
+            });
+
+            updateHiddenSkills();
+            this.value = '';
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Создание проекта{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="project-box">
+        <h2>Создать новый проект</h2>
+
+        <form method="POST" class="project-form">
+            {{ form.hidden_tag() }}
+
+            <!-- Название проекта -->
+            <div class="form-group floating-label-group">
+                {{ form.title(class="form-control", placeholder=" ") }}
+                <label for="{{ form.title.id }}">Название проекта</label>
+                {% for error in form.title.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Описание проекта -->
+            <div class="form-group floating-label-group">
+                {{ form.description(class="form-control", placeholder=" ", rows="5", style="resize: none; height: 150px;") }}
+                <label for="{{ form.description.id }}">Описание проекта</label>
+                {% for error in form.description.errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+
+            <!-- Требуемые навыки -->
+            <div class="form-group floating-label-group">
+                {{ form.skills_required(class="form-control", placeholder=" ") }}
+                <label for="{{ form.skills_required.id }}">Требуемые навыки</label>
+                <small class="form-text" style="color: #6b7280;">Укажите навыки через запятую</small>
+                {% for error in form.skills_required.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Дедлайн -->
+            <div class="form-group floating-label-group">
+                {{ form.deadline(class="form-control", placeholder=" ") }}
+                <label for="{{ form.deadline.id }}">Дедлайн</label>
+                {% for error in form.deadline.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Кнопки -->
+            <div class="form-actions" style="margin-top: 1.5rem;">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('main.index') }}" class="btn btn-reject">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

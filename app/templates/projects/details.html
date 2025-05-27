@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="project-box">
+        <div class="project-header">
+            <h2>{{ project.title }}</h2>
+            {% if project.deadline %}
+                <div class="deadline">
+                    Дедлайн: {{ project.deadline.strftime('%d.%m.%Y') }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h3>Описание проекта</h3>
+            <p>{{ project.description }}</p>
+        </div>
+
+        <div class="section">
+            <h3>Требуемые навыки</h3>
+            <div class="skills-list">
+                {% for skill in project.skills_required.split(',') %}
+                    <span class="skill-badge">{{ skill.strip() }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="avatars">
+            <div class="project-participants">
+                <strong>Автор:</strong>
+                {% set colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC', '#FF8A65'] %}
+                    <a href="{{ url_for('profile.view', user_id=project.creator.id) }}" title="{{ project.creator.username }}">
+                    <div class="avatar-placeholder" style="background-color: #9CA3AF;">
+                        {{ project.creator.username[0]|upper }}
+                    </div>
+                </a>
+
+            </div>
+
+            <div class="project-participants">
+                <strong>Участники:</strong>
+                {% set colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC', '#FF8A65'] %}
+                {% for participant in project.participants %}
+                    {% set color = colors[loop.index0 % colors|length] %}
+                    <a href="{{ url_for('profile.view', user_id=participant.user.id) }}" title="{{ participant.user.username }}">
+                        <div class="avatar-placeholder" style="background-color: {{ color }};">
+                            {{ participant.user.username[0]|upper }}
+                        </div>
+                    </a>
+                {% endfor %}
+    </div>
+        </div>
+
+        {% if current_user != project.creator %}
+            <div class="section">
+                {% if not current_user_application %}
+                    <a href="{{ url_for('projects.apply', project_id=project.id) }}" class="btn btn-primary">
+                        Подать заявку
+                    </a>
+                {% else %}
+                    <p class="application-status">
+                        <strong>Ваша заявка:</strong>
+                        <span class="status-{{ current_user_application.status }}">
+                            {{ 'ожидает рассмотрения' if current_user_application.status == 'pending' else
+                               'принята' if current_user_application.status == 'accepted' else
+                               'отклонена' }}
+                        </span>
+                    </p>
+                    {% if current_user_application.status == 'pending' %}
+                        <a href="{{ url_for('projects.cancel_application', application_id=current_user_application.id) }}"
+                           class="btn btn-secondary">
+                            Отменить заявку
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if current_user == project.creator %}
+            <div class="section">
+                <a href="{{ url_for('projects.manage', project_id=project.id) }}" class="btn btn-primary small">
+                    Управление
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

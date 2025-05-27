@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Мои проекты{% endblock %}
+
+{% block content %}
+<div class="my-projects-container">
+    <h1>Мои проекты</h1>
+
+    <!-- Вкладки -->
+    <div class="projects-tabs">
+        <button class="tab-btn active" data-tab="current">Текущие проекты</button>
+        <button class="tab-btn" data-tab="created">Созданные проекты</button>
+        <button class="tab-btn" data-tab="applications">Заявки</button>
+        <button class="tab-btn" data-tab="invitations">Приглашения</button>
+    </div>
+
+    <!-- Контент вкладок -->
+    <div class="tab-content active" id="current-tab">
+        <h2>Текущие проекты</h2>
+        {% if current_projects %}
+            <div class="projects-grid">
+                {% for project in current_projects %}
+                    <div class="project-card">
+                        <h3>{{ project.title }}</h3>
+                        <p>{{ project.description|truncate(100) }}</p>
+                        <a href="{{ url_for('projects.execute', project_id=project.id) }}" class="btn btn-view">Выполнять</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Вы пока не участвуете ни в каких проектах.</p>
+        {% endif %}
+    </div>
+
+    <div class="tab-content" id="created-tab">
+        <h2>Созданные проекты</h2>
+        {% if created_projects %}
+            <div class="projects-grid">
+                {% for project in created_projects %}
+                    <div class="project-card">
+                        <h3>{{ project.title }}</h3>
+                        <p>{{ project.description|truncate(100) }}</p>
+                        <div class="project-actions">
+                            <a href="{{ url_for('projects.manage', project_id=project.id) }}" class="btn btn-view">Управление</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Вы пока не создали ни одного проекта.</p>
+        {% endif %}
+    </div>
+
+    <div class="tab-content" id="applications-tab">
+        <h2>Мои заявки</h2>
+        {% if applications %}
+            <div class="applications-list">
+                {% for application in applications %}
+                    <div class="application-card">
+                        <a href="{{ url_for('projects.details', project_id=application.project.id) }}">
+                            {{ application.project.title }}
+                        </a>
+                        <p>Статус:
+                            <span class="status-{{ application.status }}">
+                                {{ 'ожидает рассмотрения' if application.status == 'pending' else
+                                   'принята' if application.status == 'accepted' else
+                                   'отклонена' }}
+                            </span>
+                        </p>
+                        <div class="application-actions">
+                            {% if application.status == 'pending' %}
+                                <form action="{{ url_for('projects.cancel_application', application_id=application.id) }}" method="POST">
+                                    <button type="submit" class="btn btn-cancel">Отменить заявку</button>
+                                </form>
+                            {% elif application.status in ['rejected', 'accepted'] %}
+                                <form action="{{ url_for('projects.delete_application', application_id=application.id) }}" method="POST">
+                                    <button type="submit" class="btn btn-delete">Скрыть заявку</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>У вас нет активных заявок.</p>
+        {% endif %}
+    </div>
+
+
+    <div class="tab-content" id="invitations-tab">
+        <h2>Приглашения</h2>
+        {% if invitations %}
+            <div class="invitations-list">
+                {% for invitation in invitations %}
+                    <div class="invitation-card">
+                        <h3>{{ invitation.project.title }}</h3>
+                        <p>Приглашение от: {{ invitation.project.creator.username }}</p>
+                        <div class="invitation-actions">
+                            <form action="{{ url_for('projects.accept_invitation', invitation_id=invitation.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-accept">Принять</button>
+                            </form>
+                            <form action="{{ url_for('projects.reject_invitation', invitation_id=invitation.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-reject">Отклонить</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>У вас нет новых приглашений.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabButtons = document.querySelectorAll('.projects-tabs .tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab') + '-tab';
+
+                // Удалить класс active у всех
+                tabButtons.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+
+                // Добавить активный класс текущим
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+{% block title %}Выполнение проекта{% endblock %}
+
+{% block content %}
+<div class="project-box">
+    <div class="project-header">
+        <h2>{{ project.title }}</h2>
+        {% if project.deadline %}
+            {% if project.deadline %}
+                <div class="deadline">
+                    Дедлайн: {{ project.deadline.strftime('%d.%m.%Y') }}
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="project-description">
+        <h3>Описание проекта</h3>
+        <p>{{ project.description }}</p>
+    </div>
+
+    <div class="project-participants">
+        <strong>Участники:</strong>
+        {% set colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC', '#FF8A65'] %}
+        {% for participant in project.participants %}
+            {% set color = colors[participant.user.id % colors|length] %}
+            <a href="{{ url_for('profile.view', user_id=participant.user.id) }}" title="{{ participant.user.username }}">
+                <div class="avatar-placeholder" style="background-color: {{ color }};">
+                    {{ participant.user.username[0]|upper }}
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Вкладки -->
+<div class="tabs">
+    <button class="tab-btn active" data-tab="tasks">Задачи</button>
+    <button class="tab-btn" data-tab="chat">Чат</button>
+</div>
+
+<div class="tab-content active" id="tasks-tab">
+    {% if tasks %}
+
+        {% set overdue_tasks = tasks|selectattr("deadline", "lt", today)|selectattr("completed", "equalto", False)|list %}
+        {% set not_overdue_tasks = tasks|rejectattr("deadline", "lt", today)|selectattr("completed", "equalto", False)|list %}
+        {% set completed_tasks = tasks|selectattr("completed", "equalto", True)|list %}
+
+        <div class="task-list">
+            {# Просроченные задачи #}
+            {% for task in overdue_tasks %}
+                {% if not task.hidden or show_hidden %}
+                <div class="task-block task-overdue">
+                    <div class="task-header">
+                        <div class="task-content">
+                            <h4 class="task-title">⚠️{{ task.title }}</h4>
+                            <p class="task-description">{{ task.description }}</p>
+                            <p class="task-deadline"><strong>Дедлайн:</strong> {{ task.deadline.strftime('%d.%m.%Y') }}</p>
+                        </div>
+                        <div class="task-status">
+                            {% if task.subtasks %}
+                                <span class="completion-counter">
+                                    {{ task.subtasks|selectattr('completed')|list|length }}/{{ task.subtasks|length }}
+                                </span>
+                            {% endif %}
+                            {% if task.assignee %}
+                                <form method="POST" action="{{ url_for('projects.update_task_status', task_id=task.id) }}" class="inline-form">
+                                    <label>
+                                        <input type="checkbox" name="completed"
+                                            {{ 'checked' if task.completed else '' }}
+                                            {{ 'disabled' if task.subtasks and task.subtasks|rejectattr('completed')|list|length > 0 else '' }}>
+                                        Выполнено
+                                    </label>
+                                    <button type="submit" class="small">Сохранить</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if not task.assignee %}
+                        <form method="POST" action="{{ url_for('projects.assign_to_self', task_id=task.id) }}">
+                            <button type="submit">Назначить себя</button>
+                        </form>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('projects.add_subtask', task_id=task.id) }}">
+                            <input type="text" name="title" placeholder="Название подзадачи" required>
+                            <input type="date" name="deadline" required>
+                            <button type="submit">Добавить подзадачу</button>
+                        </form>
+                    {% endif %}
+
+                    {% if task.subtasks %}
+                        <div class="subtasks">
+                            <h5>Подзадачи:</h5>
+                            <ul class="subtask-list">
+                                {% for sub in task.subtasks %}
+                                    <li class="subtask-item">
+                                        <div class="subtask-content">
+                                            <strong class="subtask-title">{{ sub.title }}</strong>
+                                            <span class="subtask-deadline">— до {{ sub.deadline.strftime('%d.%m.%Y') }}</span>
+                                            <form method="POST" action="{{ url_for('projects.update_subtask_status', subtask_id=sub.id) }}" class="inline-form">
+                                                <label>
+                                                    <input type="checkbox" name="completed" {% if sub.completed %}checked{% endif %}>
+                                                    Выполнено
+                                                </label>
+                                                <button type="submit" class="small">Сохранить</button>
+                                            </form>
+                                        </div>
+                                        {% if not sub.completed %}
+                                            <div class="subtask-actions">
+                                                <form method="POST" action="{{ url_for('projects.delete_subtask', subtask_id=sub.id) }}" class="inline-form">
+                                                    <button type="submit" class="delete-btn small">Удалить</button>
+                                                </form>
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
+
+
+            {# Невыполненные задачи #}
+            {% for task in not_overdue_tasks %}
+                {% if not task.completed and (not task.hidden or show_hidden) and task not in overdue_tasks %}
+                    <div class="task-block task-{{ 'complete' if task.completed else 'partially-complete' if task.subtasks and task.subtasks|selectattr('completed')|list|length > 0 else 'not-started' if task.assignee else 'unassigned' }}">
+                        <div class="task-header">
+                            <div class="task-content">
+                                <h4 class="task-title">{{ task.title }}</h4>
+                                <p class="task-description">{{ task.description }}</p>
+                                <p class="task-deadline"><strong>Дедлайн:</strong> {{ task.deadline.strftime('%d.%m.%Y') }}</p>
+                            </div>
+                            <div class="task-status">
+                                {% if task.subtasks %}
+                                    <span class="completion-counter">
+                                        {{ task.subtasks|selectattr('completed')|list|length }}/{{ task.subtasks|length }}
+                                    </span>
+                                {% endif %}
+
+                                {% if task.assignee %}
+                                    <form method="POST" action="{{ url_for('projects.update_task_status', task_id=task.id) }}" class="inline-form">
+                                        <label>
+                                            <input type="checkbox" name="completed"
+                                                {{ 'checked' if task.completed else '' }}
+                                                {{ 'disabled' if task.subtasks and task.subtasks|rejectattr('completed')|list|length > 0 else '' }}>
+                                            Выполнено
+                                        </label>
+                                        <button type="submit" class="small">Сохранить</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if not task.assignee %}
+                            <form method="POST" action="{{ url_for('projects.assign_to_self', task_id=task.id) }}">
+                                <button type="submit">Назначить себя</button>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('projects.add_subtask', task_id=task.id) }}">
+                                <input type="text" name="title" placeholder="Название подзадачи" required>
+                                <input type="date" name="deadline" required>
+                                <button type="submit">Добавить подзадачу</button>
+                            </form>
+                        {% endif %}
+
+                        {% if task.subtasks %}
+                            <div class="subtasks">
+                                <h5>Подзадачи:</h5>
+                                <ul class="subtask-list">
+                                    {% for sub in task.subtasks %}
+                                        <li class="subtask-item">
+                                            <div class="subtask-content">
+                                                <strong class="subtask-title">{{ sub.title }}</strong>
+                                                <span class="subtask-deadline">— до {{ sub.deadline.strftime('%d.%m.%Y') }}</span>
+                                                <form method="POST" action="{{ url_for('projects.update_subtask_status', subtask_id=sub.id) }}" class="inline-form">
+                                                    <label>
+                                                        <input type="checkbox" name="completed" {% if sub.completed %}checked{% endif %}>
+                                                        Выполнено
+                                                    </label>
+                                                    <button type="submit" class="small">Сохранить</button>
+                                                </form>
+                                            </div>
+                                            {% if not sub.completed %}
+                                                <div class="subtask-actions">
+                                                    <form method="POST" action="{{ url_for('projects.delete_subtask', subtask_id=sub.id) }}" class="inline-form">
+                                                        <button type="submit" class="delete-btn small">Удалить</button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+
+            {# Выполненные задачи #}
+            {% for task in completed_tasks %}
+                {% if task.completed and (not task.hidden or show_hidden) %}
+                    <div class="task-block task-complete">
+                        <div class="task-header">
+                            <div class="task-content">
+                                <h4 class="task-title">{{ task.title }}</h4>
+                                <p class="task-description">{{ task.description }}</p>
+                                <p class="task-deadline"><strong>Дедлайн:</strong> {{ task.deadline.strftime('%d.%m.%Y') }}</p>
+                            </div>
+                            <div class="task-status">
+                                {% if task.subtasks %}
+                                    <span class="completion-counter">
+                                        {{ task.subtasks|selectattr('completed')|list|length }}/{{ task.subtasks|length }}
+                                    </span>
+                                {% endif %}
+                                <form method="POST" action="{{ url_for('projects.update_task_status', task_id=task.id) }}" class="inline-form">
+                                    <label>
+                                        <input type="checkbox" name="completed" checked>
+                                        Выполнено
+                                    </label>
+                                    <button type="submit" class="small">Сохранить</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('projects.hide_task', task_id=task.id) }}" class="inline-form">
+                                    <button type="submit" class="small">Скрыть</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        {% if task.subtasks %}
+                            <div class="subtasks">
+                                <h5>Подзадачи:</h5>
+                                <ul class="subtask-list">
+                                    {% for sub in task.subtasks %}
+                                        <li class="subtask-item">
+                                            <div class="subtask-content">
+                                                <strong class="subtask-title">{{ sub.title }}</strong>
+                                                <span class="subtask-deadline">— до {{ sub.deadline.strftime('%d.%m.%Y') }}</span>
+                                                <form method="POST" action="{{ url_for('projects.update_subtask_status', subtask_id=sub.id) }}" class="inline-form">
+                                                    <label>
+                                                        <input type="checkbox" name="completed" {% if sub.completed %}checked{% endif %}>
+                                                        Выполнено
+                                                    </label>
+                                                    <button type="submit" class="small">Сохранить</button>
+                                                </form>
+                                            </div>
+                                            {% if not sub.completed %}
+                                                <div class="subtask-actions">
+                                                    <form method="POST" action="{{ url_for('projects.delete_subtask', subtask_id=sub.id) }}" class="inline-form">
+                                                        <button type="submit" class="delete-btn small">Удалить</button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Нет доступных задач.</p>
+    {% endif %}
+
+    {% if hidden_exists %}
+        <div class="show-hidden-tasks">
+            <form method="POST" action="{{ url_for('projects.unhide_all_tasks', project_id=project.id) }}">
+                <button type="submit">Показать скрытые задачи</button>
+            </form>
+        </div>
+    {% endif %}
+</div>
+
+<div class="tab-content" id="chat-tab">
+    <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+            {% set colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC', '#FF8A65'] %}
+
+            {% for message in messages %}
+                {% set is_own = message.user.id == current_user.id %}
+                {% set color = colors[message.user.id % colors|length] %}
+                <div class="chat-message {{ 'own' if is_own else 'incoming' }}">
+                    {% if is_own %}
+                        <div class="avatar-placeholder" style="background-color: {{ color }};">
+                            {{ message.user.username[0]|upper }}
+                        </div>
+                        <div class="message-bubble">
+                            <div class="message-meta">
+                                <span class="username">{{ message.user.username }}</span>
+                                <span class="timestamp">{{ message.timestamp.strftime('%H:%M %d.%m') }}</span>
+                            </div>
+                            <div class="message-content">{{ message.content }}</div>
+                        </div>
+                    {% else %}
+                        <div class="avatar-placeholder" style="background-color: {{ color }};">
+                            {{ message.user.username[0]|upper }}
+                        </div>
+                        <div class="message-bubble">
+                            <div class="message-meta">
+                                <span class="username">{{ message.user.username }}</span>
+                                <span class="timestamp">{{ message.timestamp.strftime('%H:%M %d.%m') }}</span>
+                            </div>
+                            <div class="message-content">{{ message.content }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <form id="chat-form" class="chat-form">
+            <input type="text" id="chat-input" name="content" placeholder="Напишите сообщение...">
+            <button type="submit">➤</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const CURRENT_USER_ID = {{ current_user.id }};
+  const colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC', '#FF8A65'];
+
+  // Функция для получения цвета по userId (синхронизирована с Jinja)
+   function getColorForUser(userId) {
+      const colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC', '#FF8A65'];
+      return colors[userId % colors.length];
+   }
+
+  // Переключение вкладок
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
+      btn.classList.add('active');
+      const tabId = btn.getAttribute('data-tab') + '-tab';
+      document.getElementById(tabId).classList.add('active');
+    });
+  });
+
+  const chatMessages = document.getElementById('chat-messages');
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+
+  // Загрузка сообщений и отрисовка
+  function loadMessages() {
+    fetch('{{ url_for("projects.get_messages", project_id=project.id) }}')
+      .then(response => response.json())
+      .then(data => {
+        chatMessages.innerHTML = '';
+
+        data.messages.forEach(msg => {
+          const isOwn = parseInt(msg.user_id) === CURRENT_USER_ID;
+          const color = getColorForUser(msg.user_id);
+
+          const messageDiv = document.createElement('div');
+          messageDiv.className = 'chat-message ' + (isOwn ? 'own' : 'incoming');
+
+          const avatarDiv = document.createElement('div');
+          avatarDiv.className = 'avatar-placeholder';
+          avatarDiv.style.backgroundColor = color;
+          avatarDiv.textContent = msg.username.charAt(0).toUpperCase();
+
+          const bubbleDiv = document.createElement('div');
+          bubbleDiv.className = 'message-bubble';
+
+          const metaDiv = document.createElement('div');
+          metaDiv.className = 'message-meta';
+          metaDiv.innerHTML = `<span class="username">${msg.username}</span> <span class="timestamp">${msg.timestamp}</span>`;
+
+          const contentDiv = document.createElement('div');
+          contentDiv.className = 'message-content';
+          contentDiv.textContent = msg.content;
+
+          bubbleDiv.appendChild(metaDiv);
+          bubbleDiv.appendChild(contentDiv);
+
+          if (isOwn) {
+            messageDiv.appendChild(bubbleDiv);
+            messageDiv.appendChild(avatarDiv);
+          } else {
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(bubbleDiv);
+          }
+
+          chatMessages.appendChild(messageDiv);
+        });
+
+        // Автопрокрутка вниз
+        //chatMessages.scrollTop = chatMessages.scrollHeight;
+      })
+      .catch(error => {
+        console.error('Ошибка загрузки сообщений:', error);
+      });
+  }
+
+  // Обработка отправки сообщения
+  chatForm.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!chatInput.value.trim()) return;
+
+    const formData = new FormData(chatForm);
+    fetch('{{ url_for("projects.send_message", project_id=project.id) }}', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Ошибка при отправке сообщения');
+      chatInput.value = '';
+      loadMessages();
+    })
+    .catch(error => alert(error.message));
+  });
+
+  // Запуск
+  loadMessages();
+  setInterval(loadMessages, 3000);
+</script>
+{% endblock %}

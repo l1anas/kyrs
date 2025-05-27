@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename='uploads/' + user.avatar) if user.avatar else url_for('static', filename='images/default-avatar.png') }}"
+                         class="rounded-circle mb-3" width="150" height="150">
+                    <h4>{{ user.username }}</h4>
+                    <p class="text-muted">Member since {{ user.created_at.strftime('%Y') }}</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Skills</h5>
+                    {% if skills %}
+                        {% for skill in skills %}
+                            <span class="badge badge-primary">{{ skill.strip() }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No skills specified</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">About</h5>
+                    <p class="card-text">
+                        {% if user.about_me %}
+                            {{ user.about_me }}
+                        {% else %}
+                            <span class="text-muted">No information provided</span>
+                        {% endif %}
+                    </p>
+
+                    <h5 class="mt-4">Projects Created</h5>
+                    <p>
+                        {{ created_projects }} project{{ 's' if created_projects != 1 else '' }}
+                    </p>
+
+                    {% if current_user.is_authenticated and current_user != user %}
+                        <hr>
+                        <a href="#" class="btn btn-primary">Send Message</a>
+                        <a href="#" class="btn btn-outline-primary">Invite to Project</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

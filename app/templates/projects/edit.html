@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Edit Project: {{ project.title }}</h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.title.label(class="form-control-label") }}
+                    {{ form.title(class="form-control") }}
+                    {% for error in form.title.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {{ form.description.label(class="form-control-label") }}
+                    {{ form.description(class="form-control", rows=5) }}
+                    {% for error in form.description.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {{ form.skills_required.label(class="form-control-label") }}
+                    {{ form.skills_required(class="form-control") }}
+                    {% for error in form.skills_required.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {{ form.deadline.label(class="form-control-label") }}
+                    {{ form.deadline(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-primary") }}
+                    <a href="{{ url_for('projects.project_details', project_id=project.id) }}"
+                       class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

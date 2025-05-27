@@ -1,0 +1,1413 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+}
+
+.header {
+    background: #1f2937;
+    padding: 1rem 2rem;
+    color: #fff;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-links a {
+    color: #ddd;
+    margin-left: 1.5rem;
+    text-decoration: none;
+    position: relative;
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+    color: #fff;
+}
+
+.navbar-links a.active::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #3b82f6;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.footer {
+    text-align: center;
+    padding: 1rem 0;
+    background: #f0f0f0;
+    margin-top: 2rem;
+}
+.project-box {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+.project-box h2 {
+    margin-top: 0;
+}
+.project-participants {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ccc;
+}
+.project-participants a {
+    text-decoration: none;  /* убираем подчеркивание */
+    color: inherit;         /* цвет текста наследуем */
+    display: inline-flex;   /* для центрирования */
+    align-items: center;
+}
+
+.project-participants a:hover .avatar-placeholder,
+.project-participants a:hover img.avatar {
+    filter: brightness(90%);
+    cursor: pointer;
+}
+
+/* Стили для аватарки-заглушки с буквой */
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-right: 5px;
+    /* Очень важно убрать подчеркивание если это ссылка */
+    text-decoration: none;
+}
+
+/* Табуляция */
+.tabs {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-link {
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: #555;
+    font-weight: bold;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-link.active {
+    color: #111;
+    border-color: #3b82f6;
+}
+
+/* Стили для задач */
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.task-block {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.task-content {
+    flex-grow: 1;
+}
+
+.task-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.task-description {
+    margin: 0 0 0.5rem 0;
+    color: #555;
+}
+
+.task-deadline {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.task-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 1rem;
+}
+
+.completion-counter {
+    font-weight: bold;
+    color: #444;
+    font-size: 0.9rem;
+}
+
+/* Стили для форм */
+form {
+    margin: 0.5rem 0;
+}
+
+form.inline-form {
+    display: inline;
+    margin: 0;
+}
+
+/* Стили для подзадач */
+.subtasks {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.subtask-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+}
+
+.subtask-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.subtask-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.subtask-title {
+    font-weight: 500;
+}
+
+.subtask-deadline {
+    font-size: 0.8rem;
+    color: #666;
+    margin-left: 0.5rem;
+}
+
+.subtask-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Стили для кнопок */
+button {
+    padding: 0.4rem 0.8rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #2563eb;
+}
+
+button.small {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.delete-btn {
+    background-color: #ef4444;
+}
+
+.delete-btn:hover {
+    background-color: #dc2626;
+}
+
+/* Стили для инпутов */
+input[type="text"],
+input[type="date"] {
+    padding: 0.5rem;
+    margin: 0.2rem 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+input[type="checkbox"] {
+    margin-right: 0.3rem;
+}
+
+/* Цвета состояний задач */
+.task-unassigned {
+    background-color: #f3f4f6;
+    border-left: 4px solid #9ca3af;
+}
+
+.task-not-started {
+    background-color: #fee2e2;
+    border-left: 4px solid #ef4444;
+}
+
+.task-partially-complete {
+    background-color: #fef3c7;
+    border-left: 4px solid #f59e0b;
+}
+
+.task-complete {
+    background-color: #d1fae5;
+    border-left: 4px solid #10b981;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .task-header {
+        flex-direction: column;
+    }
+
+    .task-status {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+
+    .subtask-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .subtask-actions {
+        align-self: flex-end;
+    }
+}
+
+.show-hidden-tasks a {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #e5e7eb;
+    color: #374151;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.show-hidden-tasks a:hover {
+    background: #d1d5db;
+}
+
+/* Контейнер профиля */
+.profile-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Хедер профиля */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Аватар пользователя */
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #3b82f6; /* синий акцент */
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+/* Заглушка аватара */
+.profile-avatar-default {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #64b5f6; /* светло-синий фон */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    user-select: none;
+    text-transform: uppercase;
+    border: 3px solid #3b82f6;
+}
+
+/* Имя пользователя */
+.profile-header h1 {
+    font-size: 2rem;
+    color: #1f2937;
+    margin: 0;
+}
+
+/* Кнопка редактирования */
+.btn-edit {
+    margin-left: auto;
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.btn-edit:hover {
+    background-color: #2563eb;
+}
+
+/* Детали профиля */
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Каждый блок с информацией */
+.detail-item h3 {
+    margin-bottom: 0.5rem;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.3rem;
+}
+
+/* Навыки */
+.skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.skill-tag {
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Контактная информация */
+.detail-item p {
+    color: #4b5563;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Форма удаления профиля */
+.delete-form {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+    padding: 0.6rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .btn-edit {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Дополнения к существующему стилю для главной страницы и поиска */
+
+.main-container, .search-results-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+h1 {
+    color: #1f2937;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+h2 {
+    color: #1f2937;
+    font-size: 1.5rem;
+    margin: 1.5rem 0 1rem;
+}
+
+.search-box {
+    margin: 2rem 0;
+}
+
+.search-box input[type="text"] {
+    width: 100%;
+    max-width: 600px;
+    padding: 0.8rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-box input[type="text"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.search-box button {
+    padding: 0.8rem 1.5rem;
+    margin-left: 0.5rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.search-box button:hover {
+    background: #2563eb;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.project-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.project-card h3 {
+    color: #1f2937;
+    margin: 0 0 1rem;
+    font-size: 1.2rem;
+}
+
+.project-description {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
+    flex-grow: 1;
+}
+
+.project-skills {
+    margin: 1rem 0;
+}
+
+.project-skills strong {
+    display: block;
+    color: #374151;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.skill-badge {
+    display: inline-block;
+    background-color: #e5e7eb;
+    color: #374151;
+    padding: 0.3rem 0.8rem;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.btn-join, .btn-view {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background: #3b82f6;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.3s;
+    align-self: flex-start;
+    margin-top: auto;
+}
+
+.btn-join:hover, .btn-view:hover {
+    background: #2563eb;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    padding: 1rem 0;
+}
+
+.pagination a {
+    padding: 0.5rem 1rem;
+    background: #e5e7eb;
+    color: #374151;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+
+.pagination a:hover {
+    background: #d1d5db;
+}
+
+.pagination span {
+    color: #4b5563;
+    font-size: 0.9rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .search-box {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .search-box button {
+        margin-left: 0;
+        margin-top: 0.5rem;
+        width: 100%;
+    }
+}
+
+/* Стили для страницы "Мои проекты" */
+.my-projects-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.projects-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 2rem 0 1.5rem;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: 0.7rem 1.5rem;
+    background: none;
+    border: none;
+    border-radius: 6px 6px 0 0;
+    font-size: 1rem;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    white-space: nowrap;
+}
+
+.tab-btn.active {
+    color: #1f2937;
+    font-weight: 600;
+    background: #f8fafc;
+}
+
+.tab-btn.active::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: #3b82f6;
+}
+
+.tab-btn:hover:not(.active) {
+    background: #f3f4f6;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Стили для карточек проектов */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.project-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.project-card h3 {
+    color: #1f2937;
+    margin: 0 0 1rem;
+    font-size: 1.2rem;
+}
+
+.project-description {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
+    flex-grow: 1;
+}
+
+.project-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.project-status {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.participants-count {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.project-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: auto;
+}
+
+/* Стили для списков заявок и приглашений */
+.applications-list, .invitations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.application-card, .invitation-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 1.2rem;
+    transition: all 0.3s;
+}
+
+.application-card:hover, .invitation-card:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.application-header, .invitation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+}
+
+.application-title {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.application-title:hover {
+    text-decoration: underline;
+}
+
+.application-date, .invitation-date {
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.application-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.application-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.status-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-message {
+    color: #4b5563;
+    font-size: 0.9rem;
+}
+
+.application-card.status-pending .status-badge {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.application-card.status-accepted .status-badge {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.application-card.status-rejected .status-badge {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.invitation-title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1f2937;
+}
+
+.invitation-from {
+    color: #4b5563;
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+.invitation-message {
+    color: #4b5563;
+    margin: 0.8rem 0;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+.invitation-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+
+/* Стили для пустых состояний */
+.empty-state {
+    text-align: center;
+    padding: 3rem 0;
+    margin: 2rem 0;
+}
+
+.empty-image {
+    max-width: 200px;
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+}
+
+.empty-state p {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* Стили для кнопок */
+.btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-view {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-view:hover {
+    background: #2563eb;
+}
+
+.btn-manage {
+    background: #8b5cf6;
+    color: white;
+}
+
+.btn-manage:hover {
+    background: #7c3aed;
+}
+
+.btn-accept {
+    background: #10b981;
+    color: white;
+}
+
+.btn-accept:hover {
+    background: #0d9b6e;
+}
+
+.btn-reject, .btn-cancel {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-reject:hover, .btn-cancel:hover {
+    background: #dc2626;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .projects-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+        flex: 0 0 auto;
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .application-body, .invitation-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+
+    .application-actions, .invitation-actions {
+        width: 100%;
+    }
+
+    .application-actions .btn, .invitation-actions .btn {
+        width: 100%;
+    }
+}
+.floating-label-group {
+    position: relative;
+    margin-top: 1.5rem;
+}
+
+.floating-label-group input,
+.floating-label-group textarea {
+    padding: 1.2rem 0.75rem 0.4rem;  /* одинаковый отступ слева и справа */
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    width: 100%;
+    background: white;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-sizing: border-box;  /* важно */
+}
+
+.floating-label-group label {
+    position: absolute;
+    top: 1rem;
+    left: 0.75rem;
+    color: #6b7280;
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    background: white;
+    padding: 0 0.25rem;
+}
+
+
+
+/* Стили для select с плавающим лейблом */
+.select-floating-group {
+    position: relative;
+    margin-top: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.select-floating-group select {
+    height: 3.5rem;
+    padding: 1.5rem 0.75rem 0.5rem;
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1em;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.select-floating-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.select-floating-group label {
+    position: absolute;
+    top: 1.1rem;
+    left: 0.75rem;
+    color: #6b7280;
+    font-size: 1rem;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    background: white;
+    padding: 0 0.25rem;
+}
+
+.select-floating-group select:focus + label,
+.select-floating-group select:not(:placeholder-shown) + label,
+.select-floating-group select:valid + label {
+    top: 0.4rem;
+    left: 0.7rem;
+    font-size: 0.75rem;
+    color: #3b82f6;
+}
+
+/* Увеличенный select */
+.select-large {
+    min-height: 3.5rem;
+    padding-top: 1.5rem;
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.deadline {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #374151;
+}
+
+.avatars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.project-author,
+.project-participants {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 1rem;
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.project-deadline {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.deadline-label {
+    font-weight: bold;
+    margin-right: 0.3rem;
+}
+
+.project-description h3 {
+    margin-bottom: 0.5rem;
+}
+
+.avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+
+
+
+
+
+
+
+
+
+/* Контейнеры */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+}
+
+.auth-box {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Заголовки */
+.auth-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Унифицированный стиль группы */
+.floating-label-group,
+.select-floating-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+/* Общие поля: input, textarea, select */
+.floating-label-group input,
+.floating-label-group textarea,
+.select-floating-group select {
+    width: 100%;
+    padding: 0.75rem 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    background: none;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    resize: none; /* делаем textarea фиксированного размера */
+    min-height: 3rem;
+}
+
+/* Плавающий лейбл */
+.floating-label-group label,
+.select-floating-group label {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    font-size: 0.9rem;
+    color: #888;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background: white;
+    padding: 0 0.25rem;
+}
+
+/* Активное состояние */
+.floating-label-group input:focus + label,
+.floating-label-group input:not(:placeholder-shown) + label,
+.floating-label-group textarea:focus + label,
+.floating-label-group textarea:not(:placeholder-shown) + label,
+.select-floating-group select:focus + label,
+.select-floating-group select:valid + label {
+    top: -0.6rem;
+    left: 0.5rem;
+    font-size: 0.75rem;
+    color: #555;
+}
+
+/* Стиль ошибки */
+.form-error {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* Кнопки */
+.btn.full-width {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+/* Ссылки */
+.auth-links {
+    margin-top: 1rem;
+    text-align: center;
+}
+.task-overdue {
+    background-color: #f3e5f5; /* светло-фиолетовый */
+    border-left: 4px solid #ce93d8;
+}
+
+
+
+
+
+
+
+
+
+/* Контейнер всего чата */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 500px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fafafa;
+}
+
+/* Область с сообщениями */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Сообщение от других пользователей (слева) */
+.chat-message.incoming {
+    align-self: flex-start;
+    display: flex;
+    max-width: 80%;
+}
+
+.chat-message.own {
+    align-self: flex-end;
+    display: flex;
+    flex-direction: row; /* это меняет порядок элементов внутри на обратный */
+    justify-content: flex-end;
+    max-width: 80%;
+}
+.chat-message.own .avatar-placeholder {
+    margin-left: 8px;
+}
+/* Аватарка */
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Для входящих сообщений - аватар слева */
+.chat-message.incoming .avatar-placeholder {
+    margin-right: 8px;
+}
+
+/* Для своих сообщений - аватар справа */
+.chat-message.own .avatar-placeholder {
+    margin-left: 8px;
+}
+
+/* Облако сообщения */
+.message-bubble {
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    max-width: 100%;
+    word-break: break-word;
+}
+
+/* Стиль для своих сообщений */
+.chat-message.own .message-bubble {
+    background-color: #DCF8C6;
+    border-top-right-radius: 0;
+}
+
+/* Стиль для чужих сообщений */
+.chat-message.incoming .message-bubble {
+    background-color: #fff;
+    border-top-left-radius: 0;
+}
+
+/* Метаданные */
+.message-meta {
+    font-size: 0.8em;
+    color: #666;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Текст сообщения */
+.message-content {
+    font-size: 1em;
+    color: #333;
+    white-space: pre-wrap;
+}
+
+/* Форма ввода */
+.chat-form {
+    display: flex;
+    border-top: 1px solid #ccc;
+    padding: 10px;
+    background: white;
+}
+
+.chat-form input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-right: 10px;
+}
+
+.chat-form button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}

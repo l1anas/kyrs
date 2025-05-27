@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Профиль {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+
+    <div id="profile-view">
+        <div class="profile-left">
+            {% if user.avatar %}
+                <div class="profile-avatar-wrapper">
+                    <img src="{{ url_for('static', filename=user.avatar) }}" alt="Аватарка" class="profile-avatar">
+
+                </div>
+            {% else %}
+                <div class="profile-avatar-default small-text">Нет фото</div>
+            {% endif %}
+        </div>
+
+        <div class="profile-right">
+            <h1>{{ user.username }}</h1>
+
+            <div class="detail-item">
+                <h3>О себе</h3>
+                <p id="about_me-text">
+                    {% if user.about_me %}
+                        {{ user.about_me }}
+                    {% else %}
+                        {% if user == current_user %}
+                            Вы пока ничего не рассказали о себе
+                        {% else %}
+                            Пользователь пока ничего не рассказал о себе
+                        {% endif %}
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="detail-item">
+                <h3>Навыки</h3>
+                <div class="section">
+                    {% if user.skills %}
+                        {% for skill in user.skills.split(',') %}
+                            <span class="skill-tag">{{ skill.strip() }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <p>
+                            {% if user == current_user %}
+                                Вы пока не указали навыки
+                            {% else %}
+                                Навыки не указаны
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <h3>Контактная информация</h3>
+                <p id="email-text">Email: {{ user.email or 'не указан' }}</p>
+            </div>
+
+            {% if user == current_user %}
+            <div class="profile-actions">
+                <form method="POST" action="{{ url_for('profile.delete') }}" class="delete-form">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены?')">Удалить профиль</button>
+                </form>
+                <a href="{{ url_for('profile.edit', user_id=user.id) }}" class="btn btn-edit">Редактировать</a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.profile-left {
+    float: left;
+    margin-right: 30px;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-avatar-default {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+    padding: 10px;
+}
+
+.skill-tag {
+    background-color: #e0e0e0;
+    color: #374151;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 20px;
+    padding: 6px 12px;
+    margin: 4px;
+    font-size: 14px;
+    font-weight: 400;
+}
+.profile-actions form {
+    margin: 0;
+}
+.profile-actions .btn {
+    white-space: nowrap;
+}
+.profile-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+    justify-content: center;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+
+{% block title %}Управление проектом {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="project-box">
+        <h2>Управление проектом: {{ project.title }}</h2>
+        <p><strong>Дедлайн:</strong> {{ project.deadline.strftime('%d.%m.%Y') if project.deadline else 'не установлен' }}</p>
+        {% if current_user.id == project.creator_id %}
+        <form method="POST" action="{{ url_for('projects.update_project_deadline', project_id=project.id) }}">
+            <label for="deadline"><strong>Изменить дедлайн проекта:</strong></label>
+            <input type="date" name="deadline" value="{{ project.deadline }}">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+        {% endif %}
+
+        <!-- Вкладки -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="tasks">Задачи</button>
+            <button class="tab-btn" data-tab="management">Участники</button>
+            <button class="tab-btn" data-tab="reporting">Отчетность</button>
+        </div>
+
+        <!-- Задачи -->
+        <div class="tab-content active" id="tasks-tab">
+            <h3>Добавить новую задачу</h3>
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="form-group floating-label-group">
+                        {{ form.title(class="form-control", placeholder=" ") }}
+                        <label for="{{ form.title.id }}">Название задачи</label>
+                    </div>
+
+                    <div class="form-group floating-label-group">
+                        {{ form.description(class="form-control", placeholder=" ", rows="4") }}
+                        <label for="{{ form.description.id }}">Описание</label>
+                    </div>
+
+                    <div class="form-group floating-label-group">
+                        {{ form.deadline(class="form-control", placeholder=" ") }}
+                        <label for="{{ form.deadline.id }}">Дедлайн</label>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="select-floating-group">
+                            <select name="assignee" class="form-control select-large" id="assignee" required>
+                                <option value="" selected disabled></option>
+                                <option value="">Не назначен</option>
+                                {% for participant in project.participants %}
+                                    <option value="{{ participant.user.id }}">{{ participant.user.username }}</option>
+                                {% endfor %}
+                            </select>
+                            <label for="assignee">Ответственный</label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions" style="margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary">Добавить задачу</button>
+                    </div>
+                </form>
+
+            <h3>Список задач</h3>
+            <div class="task-list">
+                {% for task in project.tasks.filter_by(parent_task_id=None).all() %}
+                <div class="task-block">
+                    <div class="task-header">
+                        <div>
+                            <h4 class="task-title">{{ task.title }}</h4>
+                            {% if task.description %}
+                            <p class="task-description">{{ task.description }}</p>
+                            {% endif %}
+                            <p class="task-deadline">Дедлайн: {{ task.deadline.strftime('%d.%m.%Y') if task.deadline else 'не установлен' }}</p>
+
+                            <p>Ответственный: {{ task.assignee.username if task.assignee else 'не назначен' }}</p>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-left: auto;">
+                            <button type="button" class="btn btn-edit-task big">Редактировать</button>
+                            <form method="POST" action="{{ url_for('projects.delete_task', task_id=task.id) }}" class="inline-form" onsubmit="return confirm('Удалить задачу?');">
+                                <button type="submit" class="btn delete-btn big">Удалить</button>
+                            </form>
+                        </div>
+
+                    </div>
+                        <form method="POST" action="{{ url_for('projects.edit_task', task_id=task.id) }}" class="task-edit-form" style="display: none;">
+                            <div class="form-group floating-label-group">
+                                <input type="text" name="title" value="{{ task.title }}" class="form-control" placeholder=" " required>
+                                <label>Название задачи</label>
+                            </div>
+
+                            <div class="form-group floating-label-group">
+                                <textarea name="description" class="form-control" rows="4" placeholder=" ">{{ task.description }}</textarea>
+                                <label>Описание</label>
+                            </div>
+
+                            <div class="form-group floating-label-group">
+                                <input type="date" name="deadline" value="{{ task.deadline.strftime('%Y-%m-%d') if task.deadline else '' }}" class="form-control" placeholder=" ">
+                                <label>Дедлайн</label>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="select-floating-group">
+                                    <select name="assignee_id" class="form-control select-large" id="assignee" required>
+                                        <option value="" selected disabled></option>
+                                        <option value="" {% if not task.assignee_id %}selected{% endif %}>Не назначен</option>
+                                        {% for participant in project.participants %}
+                                            <option value="{{ participant.user.id }}" {% if task.assignee_id == participant.user.id %}selected{% endif %}>
+                                                {{ participant.user.username }}
+                                            </option>
+                                        {% endfor %}
+
+                                    </select>
+                                    <label for="assignee">Ответственный</label>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 0.5rem;">
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                                    <button type="button" class="btn btn-secondary btn-cancel-edit">Отмена</button>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                {% else %}
+                    <p>Пока нет задач в этом проекте.</p>
+                {% endfor %}
+            </div>
+
+            <div style="text-align: center; margin-top: 0.5rem;">
+                <h3 style="color:#b91c1c; margin-bottom: 0.5rem;">Опасная зона</h3>
+                <form method="POST" action="{{ url_for('projects.delete', project_id=project.id) }}" onsubmit="return confirm('Удалить проект?');">
+                    <button type="submit" class="btn delete-btn">Удалить проект</button>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- Управление -->
+        <div class="tab-content" id="management-tab">
+            <h3>Участники проекта</h3>
+            <div class="project-participants" style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start;">
+                {% set colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC', '#FF8A65'] %}
+                {% for participant in project.participants %}
+                    {% set color = colors[loop.index0 % colors|length] %}
+                    <div class="participant-item" style="display: flex; gap: 10px; align-items: flex-start;">
+                        <!-- Аватарка с ссылкой -->
+                        <a href="{{ url_for('profile.view', user_id=participant.user.id) }}" title="{{ participant.user.username }}">
+                            <div class="avatar-placeholder" style="background-color: {{ color }}; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">
+                                {{ participant.user.username[0]|upper }}
+                            </div>
+                        </a>
+
+                        <!-- Имя участника -->
+                        <a href="{{ url_for('profile.view', user_id=participant.user.id) }}" style="text-decoration: none; color: inherit; font-weight: 500; line-height: 32px;">
+                            {{ participant.user.username }}
+                        </a>
+
+                        <!-- Кнопка Исключить или отметка Создателя -->
+                        {% if participant.user.id != project.creator_id %}
+                            <form method="POST" action="{{ url_for('projects.remove_participant', project_id=project.id, user_id=participant.user.id) }}" class="inline-form" style="margin-left: auto;">
+                                <button type="submit" class="btn delete-btn">Исключить</button>
+                            </form>
+                        {% else %}
+                            <span class="badge bg-secondary" style="margin-left: auto; line-height: 32px;">Создатель</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <h3>Заявки на участие</h3>
+            {% if project.applications.filter_by(status='pending').count() > 0 %}
+                <div class="project-applications" style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start;">
+                    {% set colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC', '#FF8A65'] %}
+                    {% for application in project.applications.filter_by(status='pending').all() %}
+                        {% set color = colors[loop.index0 % colors|length] %}
+                        <div class="application-item" style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                            <!-- Аватарка -->
+                            <a href="{{ url_for('profile.view', user_id=application.applicant.id) }}" title="{{ application.applicant.username }}" style="text-decoration: none;">
+                                <div class="avatar-placeholder" style="background-color: {{ color }}; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">
+                                    {{ application.applicant.username[0]|upper }}
+                                </div>
+                            </a>
+
+                            <!-- Имя пользователя -->
+                            <a href="{{ url_for('profile.view', user_id=application.applicant.id) }}" style="text-decoration: none; color: inherit; font-weight: 500; line-height: 32px;">
+                                {{ application.applicant.username }}
+                            </a>
+
+                            <!-- Кнопки -->
+                            <div style="margin-right: auto; display: flex; gap: 8px;">
+                                <form method="POST" action="{{ url_for('projects.accept_application', application_id=application.id) }}" class="inline-form">
+                                    <button type="submit" class="btn btn-accept">Принять</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('projects.reject_application', application_id=application.id) }}" class="inline-form">
+                                    <button type="submit" class="btn btn-reject">Отклонить</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Нет новых заявок.</p>
+            {% endif %}
+
+            <h3>Пригласить участников</h3>
+            <div class="search-box">
+                <input type="text" id="user-search" placeholder="Поиск по имени или навыкам">
+                <button id="user-search-btn">Найти</button>
+            </div>
+
+            {% if notusers %}
+                <div id="user-list" class="project-invite" style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start;">
+    {% set colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC', '#FF8A65'] %}
+    {% for user in notusers %}
+        {% set color = colors[loop.index0 % colors|length] %}
+            <div class="user-item" style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+                <div class="invite-item" style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                    <!-- Аватарка с ссылкой -->
+                    <a href="{{ url_for('profile.view', user_id=user.id) }}" title="{{ user.username }}" style="text-decoration: none;">
+                        <div class="avatar-placeholder" style="background-color: {{ color }}; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">
+                            {{ user.username[0]|upper }}
+                        </div>
+                    </a>
+
+                    <!-- Имя пользователя -->
+                    <a href="{{ url_for('profile.view', user_id=user.id) }}" style="text-decoration: none; color: inherit; font-weight: 500; line-height: 32px;">
+                        {{ user.username }}
+                    </a>
+
+                    <!-- Кнопка Пригласить -->
+                    <form method="POST" action="{{ url_for('projects.invite', project_id=project.id) }}" class="inline-form" style="margin-right: auto;">
+                        <input type="hidden" name="username" value="{{ user.username }}">
+                        <button type="submit" class="btn btn-edit-task big">Пригласить</button>
+                    </form>
+                </div>
+
+                <div style="margin-left: 42px;">
+                    {% if user.skills and user.skills.strip() %}
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">
+                            {% for skill in user.skills.split(',') %}
+                                <span style="background-color: #f3f4f6; border-radius: 12px; padding: 2px 8px; font-size: 0.85em; color: #374151;">
+                                    {{ skill.strip() }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="font-size: 0.85em; color: #6b7280; margin-top: 2px;">
+                            Навыки не указаны
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+            {% else %}
+                <p>Нет доступных пользователей для приглашения.</p>
+            {% endif %}
+
+            <h3>Приглашённые пользователи</h3>
+            {% if project.invitations.filter_by(status='pending').count() > 0 %}
+                <div class="project-invitations" style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start;">
+                    {% set colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC', '#FF8A65'] %}
+                    {% for invitation in project.invitations.filter_by(status='pending').all() %}
+                        {% set color = colors[loop.index0 % colors|length] %}
+                        <div class="invitation-item" style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                            <!-- Аватарка -->
+                            <a href="{{ url_for('profile.view', user_id=invitation.user.id) }}" title="{{ invitation.user.username }}" style="text-decoration: none;">
+                                <div class="avatar-placeholder" style="background-color: {{ color }}; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">
+                                    {{ invitation.user.username[0]|upper }}
+                                </div>
+                            </a>
+
+                            <!-- Имя пользователя -->
+                            <a href="{{ url_for('profile.view', user_id=invitation.user.id) }}" style="text-decoration: none; color: inherit; font-weight: 500; line-height: 32px;">
+                                {{ invitation.user.username }}
+                            </a>
+
+                            <!-- Кнопка "Отозвать" -->
+                            <div style="margin-right: auto;">
+                                <form method="POST" action="{{ url_for('projects.revoke_invitation', invitation_id=invitation.id) }}" class="inline-form">
+                                    <button type="submit" class="btn delete-btn">Отозвать</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Нет активных приглашений.</p>
+            {% endif %}
+        </div>
+
+        <!-- Отчетность -->
+        <div class="tab-content" id="reporting-tab">
+            <div class="report-block">
+                <h3>Статистика задач</h3>
+                <ul>
+                    <li>Всего задач: {{ project.tasks.count() }}</li>
+                    <li>Завершено: {{ project.tasks.filter_by(status='completed').count() }}</li>
+                    <li>В процессе: {{ project.tasks.filter_by(status='in_progress').count() }}</li>
+                    <li>Не начато: {{ project.tasks.filter_by(status='not_started').count() }}</li>
+                    <li>Без ответственного: {{ unassigned_tasks_count }}</li>
+                </ul>
+            </div>
+
+            <div class="report-block">
+                <h3>Прогресс проекта</h3>
+                {% set total = project.tasks.count() %}
+                {% set done = project.tasks.filter_by(status='completed').count() %}
+                {% set percent = (done / total * 100) if total > 0 else 0 %}
+                <p>Выполнено {{ done }} из {{ total }} задач ({{ percent|round(1) }}%)</p>
+                <div style="background: #e5e7eb; border-radius: 6px; overflow: hidden; width: 100%; height: 20px;">
+                    <div style="background: #4caf50; width: {{ percent }}%; height: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="report-block">
+                <h3>Активность участников</h3>
+                <ul>
+                    {% for participant in project.participants %}
+                        {% set user_tasks = project.tasks.filter_by(assignee_id=participant.user.id).all() %}
+                        {% set completed = user_tasks | selectattr("status", "equalto", "completed") | list | length %}
+                        <li><strong>{{ participant.user.username }}:</strong> {{ completed }} завершённых из {{ user_tasks|length }} задач</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Переключение вкладок
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            const tabId = btn.getAttribute('data-tab') + '-tab';
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // Поиск пользователей
+    function filterUsers() {
+        const filter = document.getElementById('user-search').value.toLowerCase();
+        document.querySelectorAll('#user-list .user-item').forEach(el => {
+            el.style.display = el.textContent.toLowerCase().includes(filter) ? '' : 'none';
+        });
+    }
+
+    document.getElementById('user-search').addEventListener('input', filterUsers);
+    document.getElementById('user-search-btn').addEventListener('click', filterUsers);
+
+    // Переключение форм редактирования задач
+    document.querySelectorAll('.task-block').forEach(task => {
+        const editBtn = task.querySelector('.btn-edit-task');
+        const cancelBtn = task.querySelector('.btn-cancel-edit');
+        const form = task.querySelector('.task-edit-form');
+        const header = task.querySelector('.task-header');
+
+        editBtn.addEventListener('click', () => {
+            form.style.display = 'block';
+            header.style.display = 'none';
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            form.style.display = 'none';
+            header.style.display = 'flex';
+        });
+    });
+</script>
+{% endblock %}
